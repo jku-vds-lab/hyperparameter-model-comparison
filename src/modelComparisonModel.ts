@@ -9,6 +9,9 @@ export class ModelComparisonModel {
     private _output: IOutput | null = null;
     private _sessionContext: ISessionContext;
 
+    private _isFilterActive: boolean = false;
+
+
     constructor(_sessionContext: ISessionContext) {
         this._sessionContext = _sessionContext;
     }
@@ -41,6 +44,8 @@ export class ModelComparisonModel {
                 code,
             });
         }
+        this._isFilterActive = !this._isFilterActive;
+        this._stateChanged.emit();
     }
 
     private _onIOPub = (msg: KernelMessage.IIOPubMessage): void => {
@@ -65,5 +70,9 @@ export class ModelComparisonModel {
 
     get stateChanged(): ISignal<ModelComparisonModel, void> {
         return this._stateChanged;
+    }
+
+    get isFilterActive(): boolean {
+        return this._isFilterActive;
     }
 }
