@@ -7,7 +7,7 @@ import {
 } from 'lineupjs';
 import React from 'react';
 
-export class LineUpWidget extends React.Component<{}> {
+export class LineUpWidget extends React.Component<Record<string, never>> {
   render(): HTMLElement {
     const arr = [];
     const cats = ['c1', 'c2', 'c3'];
