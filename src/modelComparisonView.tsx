@@ -4,13 +4,8 @@ import * as React from 'react';
 import {Fragment} from 'react';
 import Plot from 'react-plotly.js';
 import {ModelComparisonModel} from "./modelComparisonModel";
+import {LineUpWidget} from "./lineupwidget";
 // import {PartialJSONObject} from "@lumino/coreutils"
-import LineUp, {
-    LineUpCategoricalColumnDesc, LineUpColumn,
-    LineUpNumberColumnDesc,
-    LineUpRanking,
-    LineUpStringColumnDesc, LineUpSupportColumn
-} from "lineupjsx";
 
 export class ModelComparisonView extends ReactWidget {
     constructor(model: ModelComparisonModel) {
@@ -18,7 +13,8 @@ export class ModelComparisonView extends ReactWidget {
         this._model = model;
     }
 
-    protected render(): React.ReactElement<any> {
+    protected render(): React.ReactElement {
+        // actually we get the data from the model
         const arr:any = [];
         const cats = ['c1', 'c2', 'c3'];
         for (let i = 0; i < 100; ++i) {
@@ -29,6 +25,7 @@ export class ModelComparisonView extends ReactWidget {
                 cat2: cats[Math.floor(Math.random() * 3)]
             })
         }
+
         return (
             <React.Fragment>
                 <button
@@ -57,20 +54,16 @@ export class ModelComparisonView extends ReactWidget {
                                     {type: 'bar', x: [1, 2, 3], y: [2, 5, 3]}]}
                                 layout={{width: 320, height: 240, title: 'A Fancy Plot'}}
                             />
-                            <LineUp data={arr} sidePanel sidePanelCollapsed>
-                                <LineUpStringColumnDesc column="d" label="Label" width={100} />
-                                <LineUpCategoricalColumnDesc column="cat" categories={cats} color="green" />
-                                <LineUpCategoricalColumnDesc column="cat2" categories={cats} color="blue" />
-                                <LineUpNumberColumnDesc column="a" domain={[0, 10]} color="blue" />
-                                {this._model.isFilterActive && <LineUpRanking groupBy="cat" sortBy="a:desc">
-                                    <LineUpSupportColumn type="*" />
-                                    <LineUpColumn column="*" />
-                                </LineUpRanking> }
-                            </LineUp>
+                            {/*<LineUp data={arr} sidePanel sidePanelCollapsed>*/}
+                            {/*    <LineUpStringColumnDesc column="d" label="Label" width={100} />*/}
+                            {/*    <LineUpCategoricalColumnDesc column="cat" categories={cats} color="green" />*/}
+                            {/*    <LineUpCategoricalColumnDesc column="cat2" categories={cats} color="blue" />*/}
+                            {/*    <LineUpNumberColumnDesc column="a" domain={[0, 10]} color="blue" />*/}
+                            {/*</LineUp>*/}
+                            <LineUpWidget />
                         </Fragment>
                     )}
                 </UseSignal>
-
             </React.Fragment>
         );
     }
