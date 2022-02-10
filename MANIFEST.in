@@ -6,6 +6,9 @@ include package.json
 include install.json
 include ts*.json
 include yarn.lock
+exclude environment.yml
+
+include schema/ModelComparison-plugin.json
 
 graft ModelComparison/labextension
 
@@ -22,3 +25,4 @@ global-exclude *.pyc
 global-exclude *.pyo
 global-exclude .git
 global-exclude .ipynb_checkpoints
+global-exclude *.ipynb
