@@ -1,4 +1,4 @@
-name: jupyterdev
+name: model-comparison
 channels:
   - conda-forge
 dependencies:
