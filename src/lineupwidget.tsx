@@ -1,34 +1,54 @@
-import {
-  buildNumberColumn,
-  buildStringColumn,
-  createLineUp,
-  createLocalDataProvider,
-  LocalDataProvider
+import LineUp, {
+  builder,
+  buildNumberColumn
 } from 'lineupjs';
 import React from 'react';
 
-export class LineUpWidget extends React.Component<Record<string, never>> {
-  render(): HTMLElement {
-    const arr = [];
-    const cats = ['c1', 'c2', 'c3'];
-    for (let i = 0; i < 100; ++i) {
-      arr.push({
-        a: Math.random() * 10,
-        d: 'Row ' + i,
-        cat: cats[Math.floor(Math.random() * 3)],
-        cat2: cats[Math.floor(Math.random() * 3)]
-      });
-    }
+export class LineUpWidget
+  extends React.Component<ILineUpWidgetProps>
+  implements IFilterChangedHandler
+{
+  private lineup: LineUp | null = null;
+  private container: HTMLElement;
+  private reference: React.RefObject<HTMLDivElement>;
 
-    const target: HTMLElement = document.createElement('div');
-    target.className = 'lineup-widget';
-    const ldp: LocalDataProvider = createLocalDataProvider(arr, [
-      buildNumberColumn('a').build(arr.map(x => x.a)),
-      buildStringColumn('d').build(arr.map(x => x.d)),
-      buildStringColumn('cat').build(arr.map(x => x.cat)),
-      buildStringColumn('cat2').build(arr.map(x => x.cat2))
-    ]);
-    createLineUp(target, ldp);
-    return target;
+  constructor(props: ILineUpWidgetProps) {
+    super(props);
+    this.container = document.createElement('div');
+    this.container.className = 'lineup-widget';
+    this.reference = React.createRef();
+    props.watchForFilter.push(this);
+  }
+
+  render() {
+    return <div className="mc-table" ref={this.reference} />;
+  }
+
+  componentDidMount() {
+    this.lineup = builder(this.props.data)
+      .sidePanel(false)
+      .column(buildNumberColumn('n_hidden'))
+      .column(buildNumberColumn('lr'))
+      .column(buildNumberColumn('top_k'))
+      .column(buildNumberColumn('n_epochs'))
+      .column(buildNumberColumn('n_layers'))
+      .column(buildNumberColumn('batch_size'))
+      .column(buildNumberColumn('p_dropout'))
+      .column(buildNumberColumn('seq_length'))
+      .column(buildNumberColumn('loss'))
+      .build(this.container);
+
+    this.reference.current?.appendChild(this.container);
+  }
+
+  handleFilterChanged(selected: number[]): void {
+    const selectedCol = this.lineup?.data.find(
+      d => d.desc.label === 'Selections'
+    );
+    // trigger groupByMe at least once to force an update
+    do {
+      selectedCol?.groupByMe();
+    } while (!!selectedCol && selectedCol?.isGroupedBy() < 0);
+    this.lineup?.setSelection([0, 1, 2]);
   }
 }

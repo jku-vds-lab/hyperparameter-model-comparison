@@ -1,10 +1,11 @@
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 
 import * as React from 'react';
-import { Fragment } from 'react';
 import Plot from 'react-plotly.js';
 import { ModelComparisonModel } from './modelComparisonModel';
 import { LineUpWidget } from './lineupwidget';
+import { JSONValue } from '@lumino/coreutils';
+
 // import {PartialJSONObject} from "@lumino/coreutils"
 
 export class ModelComparisonView extends ReactWidget {
@@ -14,20 +15,26 @@ export class ModelComparisonView extends ReactWidget {
   }
 
   protected render(): React.ReactElement {
-    // actually we get the data from the model
-    const arr: any = [];
-    const cats = ['c1', 'c2', 'c3'];
-    for (let i = 0; i < 100; ++i) {
-      arr.push({
-        a: Math.random() * 10,
-        d: 'Row ' + i,
-        cat: cats[Math.floor(Math.random() * 3)],
-        cat2: cats[Math.floor(Math.random() * 3)]
+    //y: [2, (this._model?.output?.data as PartialJSONObject)["text/plain"], 3],
+
+    const dimensions: {
+      range: number[];
+      label: string;
+      values: JSONValue[];
+    }[] = [];
+    Object.keys(this._model.data[0]).forEach(param => {
+      dimensions.push({
+        range: [
+          Math.min(...this._model.data.map(x => x[param] as number)),
+          Math.max(...this._model.data.map(x => x[param] as number))
+        ],
+        label: param,
+        values: this._model.data.map(x => x[param])
       });
-    }
+    });
 
     return (
-      <React.Fragment>
+      <div className="mc-container">
         <button
           key="header-thread"
           className="jp-example-button"
@@ -39,35 +46,33 @@ export class ModelComparisonView extends ReactWidget {
         </button>
         <UseSignal signal={this._model.stateChanged}>
           {(): JSX.Element => (
-            <Fragment>
+            <div className="mc-plot">
               <span key="output field">
                 {JSON.stringify(this._model.output)}
               </span>
               <Plot
                 data={[
                   {
-                    x: [1, 2, 3],
-                    //y: [2, (this._model?.output?.data as PartialJSONObject)["text/plain"], 3],
-                    y: [2, 3, 4],
-                    type: 'scatter',
-                    mode: 'lines+markers',
-                    marker: { color: 'red' }
-                  },
-                  { type: 'bar', x: [1, 2, 3], y: [2, 5, 3] }
+                    type: 'parcoords',
+                    line: {
+                      color: 'blue',
+                      colorbar: {
+                        thickness: 100
+                      }
+                    },
+                    dimensions: dimensions
+                  }
                 ]}
-                layout={{ width: 320, height: 240, title: 'A Fancy Plot' }}
               />
-              {/*<LineUp data={arr} sidePanel sidePanelCollapsed>*/}
-              {/*    <LineUpStringColumnDesc column="d" label="Label" width={100} />*/}
-              {/*    <LineUpCategoricalColumnDesc column="cat" categories={cats} color="green" />*/}
-              {/*    <LineUpCategoricalColumnDesc column="cat2" categories={cats} color="blue" />*/}
-              {/*    <LineUpNumberColumnDesc column="a" domain={[0, 10]} color="blue" />*/}
-              {/*</LineUp>*/}
-              <LineUpWidget />
-            </Fragment>
+            </div>
           )}
         </UseSignal>
-      </React.Fragment>
+        {/* TODO: brutal event handling ... */}
+        <LineUpWidget
+          data={this._model.data}
+          watchForFilter={this._model.onFilterChanged}
+        />
+      </div>
     );
   }
 
